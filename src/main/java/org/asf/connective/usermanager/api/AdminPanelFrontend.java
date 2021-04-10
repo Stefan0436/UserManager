@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.asf.connective.usermanager.implementation.commands.admin.CreateProductKeys;
+import org.asf.connective.usermanager.implementation.commands.admin.ListActivationKeys;
 import org.asf.connective.usermanager.implementation.commands.admin.ListAllowedGroups;
 import org.asf.connective.usermanager.implementation.commands.admin.ListProductGroups;
 import org.asf.connective.usermanager.implementation.commands.admin.ListProductKeys;
@@ -212,6 +213,7 @@ public abstract class AdminPanelFrontend extends CyanComponent {
 		this.addCommand(new ListProductGroups());
 		this.addCommand(new ListAllowedGroups());
 		this.addCommand(new ListUsers());
+		this.addCommand(new ListActivationKeys());
 	}
 
 	/**
