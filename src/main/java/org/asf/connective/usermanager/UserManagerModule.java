@@ -24,6 +24,7 @@ import org.asf.connective.usermanager.configs.physical.ProductKeyConfig;
 import org.asf.connective.usermanager.implementation.DefaultAdminPanel;
 import org.asf.connective.usermanager.implementation.DefaultAuthFrontend;
 import org.asf.connective.usermanager.implementation.DefaultAuthSecureStorage;
+import org.asf.connective.usermanager.implementation.html.HTMLFrontendLogin;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.rats.Memory;
 import org.asf.rats.ModuleBasedConfiguration;
@@ -75,7 +76,9 @@ public class UserManagerModule extends UserManagerModificationManager {
 				}
 			}
 
-			for (ActivationKeyConfig key : getActivationKeys()) {
+			for (ActivationKeyConfig key :
+
+			getActivationKeys()) {
 				try {
 					Date expiry = parseDateString(key.expiryDate);
 					if (new Date().after(expiry)) {
@@ -322,7 +325,7 @@ public class UserManagerModule extends UserManagerModificationManager {
 	static {
 		DefaultAuthSecureStorage.assign();
 		DefaultAdminPanel.assign();
-		
+
 		configuration.put("auth-secure-storage", "storage/users");
 		configuration.put("activated-users-storage", "cache/usermanager/activated-users");
 
@@ -352,6 +355,7 @@ public class UserManagerModule extends UserManagerModificationManager {
 		configuration.put("admin-group", "server");
 
 		configuration.put("admin-commands", "/admin");
+		configuration.put("auth-frontend", "modular");
 //		configuration.put("admin-del-productkeys", "/admin/del/productkey"); // TODO
 //
 //		configuration.put("admin-create-user", "/admin/create/user"); // TODO
@@ -493,8 +497,12 @@ public class UserManagerModule extends UserManagerModificationManager {
 		cancelKeySegments = Integer.valueOf(configuration.get("cancel-key-segments"));
 		cancelKeySegmentLength = Integer.valueOf(configuration.get("cancel-key-segment-length"));
 
-		if (Memory.getInstance().get("usermanager.auth.frontend") == null) {
-			Memory.getInstance().getOrCreate("usermanager.auth.frontend").assign(new DefaultAuthFrontend());
+		if (configuration.get("auth-frontend").equals("html-internal")) {
+			Memory.getInstance().getOrCreate("usermanager.auth.frontend").assign(new HTMLFrontendLogin());
+		} else if (configuration.get("auth-frontend").equals("modular")) {
+			if (Memory.getInstance().get("usermanager.auth.frontend") == null) {
+				Memory.getInstance().getOrCreate("usermanager.auth.frontend").assign(new DefaultAuthFrontend());
+			}
 		}
 
 		for (Class<IAuthenticationBackend> impl : findClasses(getMainImplementation(), IAuthenticationBackend.class)) {

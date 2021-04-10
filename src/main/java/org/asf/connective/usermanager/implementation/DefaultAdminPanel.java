@@ -73,8 +73,9 @@ public class DefaultAdminPanel extends AdminPanelFrontend {
 									}
 									output.append(" - ").append(k);
 									if (outp.get(k) != null) {
-										output.append(" : ").append(outp.get(k)).append("\n");
+										output.append(" : ").append(outp.get(k));
 									}
+									output.append("\n");
 								}
 							}
 							getResponse().setContent("text/plain", output.toString());
