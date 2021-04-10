@@ -1,4 +1,4 @@
-package org.asf.connective.usermanager.implementation;
+package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
 import java.util.stream.Stream;

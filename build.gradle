@@ -17,7 +17,7 @@ plugins {
 
 
 // Basic information
-version = "1.0.0.A2"
+version = "1.0.0.A3"
 group = "org.asf.connective.usermanager"
 
 ext.moduleClass = "UserManagerModule"
@@ -55,11 +55,13 @@ configurePublish {
 
 
 ext.commands = [
-	"${group}.implementation.CreateCommand",
-	"${group}.implementation.AuthenticateCommand",
-	"${group}.implementation.ActivateCommand",
-	"${group}.implementation.CancelCommand",
-	"${group}.implementation.UpdateCommand"
+	"${group}.implementation.commands.CreateCommand",
+	"${group}.implementation.commands.AuthenticateCommand",
+	"${group}.implementation.commands.ActivateCommand",
+	"${group}.implementation.commands.CancelCommand",
+	"${group}.implementation.commands.UpdateCommand",
+	"${group}.implementation.commands.DeleteCommand",
+	"${group}.implementation.commands.AdminCommands"
 ]
 
 // Add extensions, processors and other classes here
@@ -537,10 +539,16 @@ String checkStandalone (String moduleConfigAdditionsStandalone, boolean first) {
 task javaDocs(type: Javadoc) {
 	classpath = sourceSets.main.runtimeClasspath
 	source = sourceSets.main.allJava
+	exclude '**/implementation/**'
+	exclude '**/backends/**'
+	exclude '**/CyanUtilDependency.**'
+	exclude '**/UserManagerModule.**'
+	exclude '**/UserManagerModificationProvider.**'
+	exclude '**/UserManagerModificationManager.**'
 }
 
 task javadocJar(type: Jar, dependsOn: 'javaDocs') {
-	from javadoc
+	from javaDocs
 	classifier = 'javadoc'
 }
 

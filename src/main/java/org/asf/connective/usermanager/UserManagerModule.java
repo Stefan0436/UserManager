@@ -19,9 +19,10 @@ import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.connective.usermanager.api.AuthSecureStorage;
 import org.asf.connective.usermanager.api.IAuthenticationBackend;
 import org.asf.connective.usermanager.api.IUserManagerCommand;
-import org.asf.connective.usermanager.backends.auth.DefaultAuthFrontend;
 import org.asf.connective.usermanager.configs.physical.ActivationKeyConfig;
 import org.asf.connective.usermanager.configs.physical.ProductKeyConfig;
+import org.asf.connective.usermanager.implementation.DefaultAdminPanel;
+import org.asf.connective.usermanager.implementation.DefaultAuthFrontend;
 import org.asf.connective.usermanager.implementation.DefaultAuthSecureStorage;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.rats.Memory;
@@ -320,6 +321,8 @@ public class UserManagerModule extends UserManagerModificationManager {
 
 	static {
 		DefaultAuthSecureStorage.assign();
+		DefaultAdminPanel.assign();
+		
 		configuration.put("auth-secure-storage", "storage/users");
 		configuration.put("activated-users-storage", "cache/usermanager/activated-users");
 
@@ -343,30 +346,27 @@ public class UserManagerModule extends UserManagerModificationManager {
 		configuration.put("create-user", "/create");
 		configuration.put("cancel-activation", "/cancel");
 		configuration.put("update-user", "/update");
-		configuration.put("remove-user", "/delete"); // TODO
+		configuration.put("remove-user", "/delete");
 		configuration.put("activate-user", "/activate");
 
-		configuration.put("admin-group", "server"); // TODO
+		configuration.put("admin-group", "server");
 
-		configuration.put("admin-create-productkeys", "/admin/create/productkeys"); // TODO
-		configuration.put("admin-del-productkeys", "/admin/del/productkey"); // TODO
-		configuration.put("admin-list-productkeys", "/admin/list/productkeys"); // TODO
-
-		configuration.put("admin-create-user", "/admin/create/user"); // TODO
-
-		configuration.put("admin-add-allowed-group", "/admin/add-allowed/group"); // TODO
-		configuration.put("admin-remove-allowed-group", "/admin/remove-allowed/group"); // TODO
-
-		configuration.put("admin-add-product-group", "/admin/add-product/group"); // TODO
-		configuration.put("admin-remove-product-group", "/admin/remove-product/group"); // TODO
-
-		configuration.put("admin-list-users", "/admin/list/users"); // TODO
-
-		configuration.put("admin-del-user", "/admin/del/user"); // TODO
-		configuration.put("admin-del-group", "/admin/del/group"); // TODO
-		configuration.put("admin-update-user", "/admin/update/user"); // TODO
-		configuration.put("admin-reload-server", "/admin/reload/configs"); // TODO
-
+		configuration.put("admin-commands", "/admin");
+//		configuration.put("admin-del-productkeys", "/admin/del/productkey"); // TODO
+//
+//		configuration.put("admin-create-user", "/admin/create/user"); // TODO
+//
+//		configuration.put("admin-add-allowed-group", "/admin/add-allowed/group"); // TODO
+//		configuration.put("admin-remove-allowed-group", "/admin/remove-allowed/group"); // TODO
+//
+//		configuration.put("admin-add-product-group", "/admin/add-product/group"); // TODO
+//		configuration.put("admin-remove-product-group", "/admin/remove-product/group"); // TODO
+//
+//		configuration.put("admin-del-user", "/admin/del/user"); // TODO
+//		configuration.put("admin-del-group", "/admin/del/group"); // TODO
+//		configuration.put("admin-update-user", "/admin/update/user"); // TODO
+//		configuration.put("admin-reload-server", "/admin/reload/configs"); // TODO
+//
 		configuration.put("allowed-groups", "users");
 		configuration.put("product-groups", "premium maven git");
 
@@ -609,6 +609,18 @@ public class UserManagerModule extends UserManagerModificationManager {
 			userStorage.put(group + "." + newUserName, storage);
 		}
 		userStorage.remove(group + "." + username);
+	}
+
+	public static String getAdminCommand() {
+		return configuration.get("admin-commands");
+	}
+
+	public static String getAdminGroup() {
+		return configuration.get("admin-group");
+	}
+
+	public static String getDeleteCommand() {
+		return configuration.get("remove-user");
 	}
 
 }

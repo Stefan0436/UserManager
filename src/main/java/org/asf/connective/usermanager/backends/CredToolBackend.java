@@ -23,7 +23,7 @@ public class CredToolBackend implements IAuthenticationBackend {
 		public int exitCode = 0;
 	}
 
-	public ProcessResult runCredTool(String... args) throws IOException, InterruptedException {
+	public ProcessResult runCredTool(String... args) throws IOException {
 		String[] cmd = new String[args.length + this.args.length + 1];
 		cmd[0] = jvm;
 		for (int i = 0; i < this.args.length; i++) {
@@ -35,7 +35,10 @@ public class CredToolBackend implements IAuthenticationBackend {
 
 		ProcessBuilder builder = new ProcessBuilder(cmd);
 		Process proc = builder.start();
-		proc.waitFor();
+		try {
+			proc.waitFor();
+		} catch (InterruptedException e) {
+		}
 
 		ProcessResult res = new ProcessResult();
 		res.error = new String(proc.getErrorStream().readAllBytes());
@@ -44,7 +47,7 @@ public class CredToolBackend implements IAuthenticationBackend {
 		return res;
 	}
 
-	public String[] getUsers(String group) throws IOException, InterruptedException {
+	public String[] getUsers(String group) throws IOException {
 		ProcessResult res = runCredTool("/ls");
 		String[] lines = res.output.replaceAll("\r", "").split("\n");
 		lines = Arrays.copyOfRange(lines, 1, lines.length);
@@ -80,22 +83,18 @@ public class CredToolBackend implements IAuthenticationBackend {
 
 	@Override
 	public boolean userExists(String group, String username) throws IOException {
-		try {
-			if (System.getProperty("os.name").toLowerCase().contains("windows")
-					|| (System.getProperty("os.name").toLowerCase().contains("win")
-							&& !System.getProperty("os.name").toLowerCase().contains("darwin"))) {
-				for (String user : getUsers(group)) {
-					if (user.equalsIgnoreCase(username))
-						return true;
-				}
-			} else {
-				for (String user : getUsers(group)) {
-					if (user.equals(username))
-						return true;
-				}
+		if (System.getProperty("os.name").toLowerCase().contains("windows")
+				|| (System.getProperty("os.name").toLowerCase().contains("win")
+						&& !System.getProperty("os.name").toLowerCase().contains("darwin"))) {
+			for (String user : getUsers(group)) {
+				if (user.equalsIgnoreCase(username))
+					return true;
 			}
-		} catch (IOException | InterruptedException e) {
-			throw new IOException(e);
+		} else {
+			for (String user : getUsers(group)) {
+				if (user.equals(username))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -159,11 +158,11 @@ public class CredToolBackend implements IAuthenticationBackend {
 
 	@Override
 	public void updateUser(String group, String username, char[] password) throws IOException {
-		Exception ex = null;
+		IOException ex = null;
 		ProcessResult result = null;
 		try {
 			result = runCredTool(group, username, new String(password));
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			ex = e;
 		}
 
@@ -172,7 +171,7 @@ public class CredToolBackend implements IAuthenticationBackend {
 		}
 
 		if (ex != null) {
-			throw new IOException(ex);
+			throw ex;
 		} else {
 			if (result.exitCode != 0) {
 				throw new IOException("CredTool Error:\n" + result.error);
@@ -182,20 +181,9 @@ public class CredToolBackend implements IAuthenticationBackend {
 
 	@Override
 	public void deleteUser(String group, String username) throws IOException {
-		Exception ex = null;
-		ProcessResult result = null;
-		try {
-			result = runCredTool("/rmuser", group, username);
-		} catch (IOException | InterruptedException e) {
-			ex = e;
-		}
-
-		if (ex != null) {
-			throw new IOException(ex);
-		} else {
-			if (result.exitCode != 0) {
-				throw new IOException("CredTool Error:\n" + result.error);
-			}
+		ProcessResult result = runCredTool("/rmuser", group, username);
+		if (result.exitCode != 0) {
+			throw new IOException("CredTool Error:\n" + result.error);
 		}
 	}
 

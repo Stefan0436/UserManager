@@ -203,4 +203,18 @@ public class AuthResult {
 		secureStorage.changeFileLocation(UserManagerModule.getStoreFile(group, newUserName));
 		username = newUserName;
 	}
+
+	/**
+	 * Deletes user storage and lock files
+	 */
+	public void deleteUser() {
+		File userDataFile = new File(UserManagerModule.getActivatedUsersDir(), group + "." + username + ".lck");
+		if (userDataFile.exists())
+			userDataFile.delete();
+
+		if (UserManagerModule.getStoreFile(group, username).exists())
+			UserManagerModule.getStoreFile(group, username).delete();
+		
+		secureStorage = null;
+	}
 }

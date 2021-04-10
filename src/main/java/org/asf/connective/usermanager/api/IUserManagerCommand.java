@@ -34,4 +34,11 @@ public interface IUserManagerCommand {
 	 * @throws IOException If processing fails
 	 */
 	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException;
+
+	/**
+	 * Optional override, if using the IContextRootProviderExtension interface, this is needed
+	 */
+	public default IUserManagerCommand newInstance() {
+		return null;
+	}
 }

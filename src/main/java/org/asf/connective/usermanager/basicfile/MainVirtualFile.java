@@ -9,13 +9,19 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.rats.ConnectiveHTTPServer;
 import org.asf.rats.HttpRequest;
 import org.asf.rats.HttpResponse;
+import org.asf.rats.http.ProviderContext;
+import org.asf.rats.http.providers.IContextProviderExtension;
+import org.asf.rats.http.providers.IContextRootProviderExtension;
 import org.asf.rats.http.providers.IServerProviderExtension;
 import org.asf.rats.http.providers.IVirtualFileProvider;
 
-public class MainVirtualFile extends CyanComponent implements IVirtualFileProvider, IServerProviderExtension {
+public class MainVirtualFile extends CyanComponent implements IVirtualFileProvider, IServerProviderExtension,
+		IContextRootProviderExtension, IContextProviderExtension {
 
 	private ConnectiveHTTPServer server;
-	
+	private String contextRoot;
+	private ProviderContext context;
+
 	@Override
 	public IVirtualFileProvider newInstance() {
 		return new MainVirtualFile();
@@ -70,6 +76,13 @@ public class MainVirtualFile extends CyanComponent implements IVirtualFileProvid
 			if (commandPath.equalsIgnoreCase(command)
 					&& (cmd.method().equals(request.method) || cmd.method().equals("*"))) {
 				try {
+					if (cmd instanceof IContextRootProviderExtension) {
+						cmd = cmd.newInstance();
+						((IContextRootProviderExtension) cmd).provideVirtualRoot(contextRoot);
+						if (cmd instanceof IContextProviderExtension) {
+							((IContextProviderExtension)cmd).provide(context);
+						}
+					}
 					cmd.run(request, response, server);
 				} catch (IOException e) {
 					error("Failed to execute usermanager command " + command, e);
@@ -88,6 +101,16 @@ public class MainVirtualFile extends CyanComponent implements IVirtualFileProvid
 	@Override
 	public void provide(ConnectiveHTTPServer server) {
 		this.server = server;
+	}
+
+	@Override
+	public void provideVirtualRoot(String virtualRoot) {
+		contextRoot = virtualRoot;
+	}
+
+	@Override
+	public void provide(ProviderContext context) {
+		this.context = context;
 	}
 
 }

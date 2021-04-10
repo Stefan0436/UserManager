@@ -1,4 +1,4 @@
-package org.asf.connective.usermanager.backends.auth;
+package org.asf.connective.usermanager.implementation;
 
 import java.io.IOException;
 

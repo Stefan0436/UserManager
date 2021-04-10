@@ -87,4 +87,12 @@ public interface IAuthenticationBackend {
 	 * @throws IOException If deleting the user fails
 	 */
 	public void deleteUser(String group, String username) throws IOException;
+
+	/**
+	 * Retrieves all users in a group
+	 * 
+	 * @param group Group name
+	 * @return Array of users in the group
+	 */
+	public String[] getUsers(String group) throws IOException;
 }
