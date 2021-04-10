@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,7 +247,8 @@ public abstract class AdminPanelFrontend extends CyanComponent {
 	protected void scanCommands() {
 		for (Class<IAdminCommand> cls : findClasses(getMainImplementation(), IAdminCommand.class)) {
 			try {
-				addCommand(cls.getConstructor().newInstance());
+				if (!Modifier.isAbstract(cls.getModifiers()))
+					addCommand(cls.getConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				error("Failed to instanciate admin command: " + cls.getTypeName(), e);
