@@ -1,5 +1,5 @@
 # ConnectiveHTTP UserManager Module
-Some short description explaining what the module does.
+User manager backend for connective.
 
 <br />
 
@@ -46,8 +46,13 @@ classes> {
 
     # ...
 
-    org.example.examplemodule.ExampleModule> 'UserManager-1.0.0.A1.jar'
-    org.example.examplemodule.ExampleModificationProvider> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.UserManagerModule> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.UserManagerModificationProvider> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.implementation.CreateCommand> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.implementation.AuthenticateCommand> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.implementation.ActivateCommand> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.implementation.CancelCommand> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.implementation.UpdateCommand> 'UserManager-1.0.0.A1.jar'
 
     # ...
 
@@ -67,16 +72,7 @@ context> {
     # We use root, but you can add the instructions to any of your contextfiles
     root> '
     # ...
-
-    extension "class:org.example.examplemodule.examples.basicfile.FileExtensionExample"
-
-    alias "class:org.example.examplemodule.examples.basicfile.AliasExample"
-
-    restriction "class:org.example.examplemodule.examples.basicfile.RestrictionExample"
-    restriction "class:org.example.examplemodule.examples.basicfile.RestrictionAuthenticationExample"
-
-    indexpage "[folder]" "class:org.example.examplemodule.examples.basicfile.IndexPageExample"
-
+    virtualfile "class:org.asf.connective.usermanager.basicfile.MainVirtualFile"
     # ...
     '
 
@@ -84,17 +80,6 @@ context> {
 }
 # ...
 
-
-# ...
-
-processors> '
-# ...
-org.example.examplemodule.examples.ExampleGetProcessor
-org.example.examplemodule.examples.ExampleUploadProcessor
-# ...
-'
-
-# ...
 ```
 
 <br />
