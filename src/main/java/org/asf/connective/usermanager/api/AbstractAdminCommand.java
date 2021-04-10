@@ -237,7 +237,6 @@ public abstract class AbstractAdminCommand implements IAdminCommand {
 	/**
 	 * Retrieves all values for a given argument name
 	 * 
-	 * @param <T>      Value type
 	 * @param argument Argument name
 	 * @return Array of values
 	 */
@@ -296,7 +295,6 @@ public abstract class AbstractAdminCommand implements IAdminCommand {
 	/**
 	 * Checks if a given argument is present
 	 * 
-	 * @param <T>      Argument type
 	 * @param argument Argument name
 	 * @param type     Argument class
 	 * @return True if present, false otherwise.
