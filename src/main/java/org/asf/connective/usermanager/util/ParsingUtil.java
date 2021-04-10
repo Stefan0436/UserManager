@@ -2,16 +2,53 @@ package org.asf.connective.usermanager.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * 
- * HTTP Utility class
+ * Parser utility class - parsers for basic commands and http queries.
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class HttpUtil {
+public class ParsingUtil {
+
+	/**
+	 * Parses the given space-separated command/arguments into an arraylist,
+	 * supports quotes and escaping.
+	 * 
+	 * @param cmd Input to parse
+	 * @return ArrayList representing the command.
+	 */
+	public static ArrayList<String> parseCommand(String cmd) {
+		ArrayList<String> args3 = new ArrayList<String>();
+		char[] argarray = cmd.toCharArray();
+		boolean ignorespaces = false;
+		String last = "";
+		int i = 0;
+		for (char c : argarray) {
+			if (c == '"' && (i == 0 || argarray[i - 1] != '\\')) {
+				if (ignorespaces)
+					ignorespaces = false;
+				else
+					ignorespaces = true;
+			} else if (c == ' ' && !ignorespaces && (i == 0 || argarray[i - 1] != '\\')) {
+				args3.add(last);
+				last = "";
+			} else if (c != '\\' || (i + 1 < argarray.length && argarray[i + 1] != '"'
+					&& (argarray[i + 1] != ' ' || ignorespaces))) {
+				last += c;
+			}
+
+			i++;
+		}
+
+		if (last == "" == false)
+			args3.add(last);
+
+		return args3;
+	}
 
 	/**
 	 * Parses a given query into a HashMap

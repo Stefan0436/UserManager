@@ -318,35 +318,6 @@ public class UserManagerModule extends UserManagerModificationManager {
 		return "UserManager";
 	}
 
-	public static ArrayList<String> parseCommand(String args) {
-		ArrayList<String> args3 = new ArrayList<String>();
-		char[] argarray = args.toCharArray();
-		boolean ignorespaces = false;
-		String last = "";
-		int i = 0;
-		for (char c : args.toCharArray()) {
-			if (c == '"' && (i == 0 || argarray[i - 1] != '\\')) {
-				if (ignorespaces)
-					ignorespaces = false;
-				else
-					ignorespaces = true;
-			} else if (c == ' ' && !ignorespaces && (i == 0 || argarray[i - 1] != '\\')) {
-				args3.add(last);
-				last = "";
-			} else if (c != '\\' || (i + 1 < argarray.length && argarray[i + 1] != '"'
-					&& (argarray[i + 1] != ' ' || ignorespaces))) {
-				last += c;
-			}
-
-			i++;
-		}
-
-		if (last == "" == false)
-			args3.add(last);
-
-		return args3;
-	}
-
 	static {
 		DefaultAuthSecureStorage.assign();
 		configuration.put("auth-secure-storage", "storage/users");

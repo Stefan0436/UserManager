@@ -3,8 +3,22 @@ package org.asf.connective.usermanager.security;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * 
+ * Rain decrypting input stream - decrypts RAIN-encrypted data.<br/>
+ * <b>WARNING:</b> only supports byte-sized reading, do not use integers!
+ * 
+ * @author Stefan0436 - AerialWorks Software Foundation
+ *
+ */
 public class DecryptingInputStream extends InputStream {
 
+	/**
+	 * Instanciates the decrypting input stream.
+	 * 
+	 * @param key    Key used for encryption.
+	 * @param source Source stream.
+	 */
 	public DecryptingInputStream(byte[] key, InputStream source) {
 		this.key = key;
 		this.source = source;
@@ -35,5 +49,5 @@ public class DecryptingInputStream extends InputStream {
 	public void close() throws IOException {
 		source.close();
 	}
-	
+
 }

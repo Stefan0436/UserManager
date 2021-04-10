@@ -8,7 +8,7 @@ import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.AuthResult;
 import org.asf.connective.usermanager.api.IAuthFrontend;
 import org.asf.connective.usermanager.api.IUserManagerCommand;
-import org.asf.connective.usermanager.util.HttpUtil;
+import org.asf.connective.usermanager.util.ParsingUtil;
 import org.asf.rats.ConnectiveHTTPServer;
 import org.asf.rats.HttpRequest;
 import org.asf.rats.HttpResponse;
@@ -34,7 +34,7 @@ public class AuthenticateCommand implements IUserManagerCommand {
 		String group = UserManagerModule.getAllowedGroups()[0];
 
 		if (request.query != null && !request.query.isEmpty()) {
-			HashMap<String, String> mp = HttpUtil.parseQuery(request.query);
+			HashMap<String, String> mp = ParsingUtil.parseQuery(request.query);
 			service = mp.get("service");
 			target = mp.get("target");
 			group = mp.getOrDefault("group", group);

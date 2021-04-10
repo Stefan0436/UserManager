@@ -17,7 +17,7 @@ plugins {
 
 
 // Basic information
-version = "1.0.0.A1"
+version = "1.0.0.A2"
 group = "org.asf.connective.usermanager"
 
 ext.moduleClass = "UserManagerModule"
@@ -32,6 +32,26 @@ ext.copyrightsuffix = "Free software, read ${license} license document for more 
 ext.description='''
 User manager backend for connective.
 '''
+
+apply from: "asf.mvn.publish.gradle"
+
+configurePublish {
+	pretty_name "ConnectiveHTTP User Manager Module"
+	description "User manager backend framework for ConnectiveHTTP."
+	
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+
+	license {
+		name "GNU Lesser General Public License v3.0"
+		url "https://www.gnu.org/licenses/lgpl-3.0.txt"
+	}
+}
 
 
 ext.commands = [
@@ -533,3 +553,5 @@ artifacts {
 	archives sourcesJar
 	archives javadocJar
 }
+
+initializeASFMVNPublish();
