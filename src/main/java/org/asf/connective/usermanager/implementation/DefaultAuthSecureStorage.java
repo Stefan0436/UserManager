@@ -229,4 +229,9 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		set("no-name", value);
 	}
 
+	@Override
+	public boolean checkSecurity(byte[] key) {
+		return Arrays.equals(key, securityKey);
+	}
+
 }

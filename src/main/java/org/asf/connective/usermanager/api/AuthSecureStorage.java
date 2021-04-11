@@ -162,4 +162,11 @@ public abstract class AuthSecureStorage {
 	 * @return Array of values matching the given class
 	 */
 	public abstract <T> T[] getAll(Class<T> type);
+
+	/**
+	 * Checks loaded storage security key
+	 * @param key Security key
+	 * @return true if valid, false otherwise
+	 */
+	public abstract boolean checkSecurity(byte[] key);
 }

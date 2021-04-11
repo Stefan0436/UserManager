@@ -1,6 +1,9 @@
 package org.asf.connective.usermanager.implementation.html;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -16,16 +19,36 @@ import org.asf.rats.Memory;
 
 public class HTMLFrontendLogin implements IAuthFrontend {
 
-	private static HashMap<String, AuthResult> authenticatedUsers = new HashMap<String, AuthResult>();
+	private static HashMap<String, Session> authenticatedUsers = new HashMap<String, Session>();
+
+	private static class Session {
+		public Date expiry;
+		public AuthResult user;
+	}
+
 	static {
 		new Thread(() -> {
 			while (true) {
 				try {
-					Thread.sleep(60 * 240 * 1000);
+					Thread.sleep(10 * 60 * 1000);
 				} catch (InterruptedException e) {
 					break;
 				}
-				authenticatedUsers.clear();
+				for (String key : new ArrayList<String>(authenticatedUsers.keySet())) {
+					while (true) {
+						try {
+							Session ses = authenticatedUsers.get(key);
+							if (ses != null) {
+								if (new Date().after(ses.expiry)) {
+									authenticatedUsers.remove(key);
+								}
+							}
+							break;
+						} catch (Exception e) {
+
+						}
+					}
+				}
 			}
 		}, "Periodic authentication cleanup").start();
 	}
@@ -77,10 +100,18 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					response.status = 302;
 					response.message = "File found";
 
-					response.setHeader("Set-Cookie", "session=" + session + "; ");
+					Calendar cal = Calendar.getInstance();
+					cal.add(Calendar.HOUR_OF_DAY, 2);
+
+					Session ses = new Session();
+					ses.user = res;
+					ses.expiry = cal.getTime();
+
+					response.setHeader("Set-Cookie",
+							"session=" + session + "; Expires=" + response.getHttpDate(ses.expiry));
 					response.setHeader("Location", file + "?" + request.query);
 
-					authenticatedUsers.put(group + "." + session, res);
+					authenticatedUsers.put(group + "." + session, ses);
 					return res;
 				} else {
 					message = "Invalid credentials";
@@ -167,12 +198,13 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 			return new AuthResult();
 		} else {
 			response.setContent("text/plain", "OK");
-			return authenticatedUsers.get(group + "." + cookies.get("session"));
+			return authenticatedUsers.get(group + "." + cookies.get("session")).user;
 		}
 	}
 
 	private String genSessionKey() {
-		return System.currentTimeMillis() + "-" + UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
+		return System.currentTimeMillis() + "-" + UUID.randomUUID().toString() + "-" + UUID.randomUUID().toString()
+				+ "-" + UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
 	}
 
 }

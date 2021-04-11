@@ -586,8 +586,12 @@ public class UserManagerModule extends UserManagerModificationManager {
 	}
 
 	public static AuthSecureStorage getSecureStore(String group, String username, byte[] key) throws IOException {
-		if (userStorage.containsKey(group + "." + username))
+		if (userStorage.containsKey(group + "." + username)) {
+			if (!userStorage.get(group + "." + username).checkSecurity(key))
+				throw new IOException("Incorrect key for loaded user");
+
 			return userStorage.get(group + "." + username);
+		}
 
 		AuthSecureStorage storage = AuthSecureStorage.open(getStoreFile(group, username), key);
 		userStorage.put(group + "." + username, storage);
