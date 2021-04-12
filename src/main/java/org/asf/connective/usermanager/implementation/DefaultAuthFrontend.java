@@ -19,4 +19,9 @@ public class DefaultAuthFrontend implements IAuthFrontend {
 		return result;
 	}
 
+	@Override
+	public boolean check(String group, HttpRequest request, HttpResponse response) throws IOException {
+		return UserManagerModule.getAuthBackend().authenticate(group, request, response).success();
+	}
+
 }

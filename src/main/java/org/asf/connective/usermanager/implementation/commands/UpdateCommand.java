@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.asf.connective.usermanager.UserManagerModule;
@@ -10,6 +11,7 @@ import org.asf.connective.usermanager.configs.UpdateUserCCFG;
 import org.asf.rats.ConnectiveHTTPServer;
 import org.asf.rats.HttpRequest;
 import org.asf.rats.HttpResponse;
+import org.asf.rats.Memory;
 
 public class UpdateCommand implements IUserManagerCommand {
 
@@ -24,6 +26,7 @@ public class UpdateCommand implements IUserManagerCommand {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
 		UpdateUserCCFG ccfg = new UpdateUserCCFG(request);
 		if (ccfg.group == null || ccfg.password == null) {
@@ -66,6 +69,11 @@ public class UpdateCommand implements IUserManagerCommand {
 			result.setNewUsername(ccfg.username);
 			UserManagerModule.getAuthBackend().updateUser(result.getGroup(), ccfg.username,
 					ccfg.password.toCharArray());
+
+			for (BiConsumer<String[], String> consumer : Memory.getInstance().getOrCreate("users.change.username")
+					.getValues(BiConsumer.class)) {
+				consumer.accept(new String[] { result.getGroup(), result.getUsername() }, ccfg.username);
+			}
 		} else {
 			UserManagerModule.getAuthBackend().updateUser(result.getGroup(), result.getUsername(),
 					ccfg.password.toCharArray());

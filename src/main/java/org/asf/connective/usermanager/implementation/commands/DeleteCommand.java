@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 
 import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.AuthResult;
@@ -9,6 +10,7 @@ import org.asf.connective.usermanager.configs.DeleteUserCCFG;
 import org.asf.rats.ConnectiveHTTPServer;
 import org.asf.rats.HttpRequest;
 import org.asf.rats.HttpResponse;
+import org.asf.rats.Memory;
 
 public class DeleteCommand implements IUserManagerCommand {
 
@@ -23,6 +25,7 @@ public class DeleteCommand implements IUserManagerCommand {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
 		DeleteUserCCFG ccfg = new DeleteUserCCFG(request);
 		if (ccfg.group == null) {
@@ -46,6 +49,11 @@ public class DeleteCommand implements IUserManagerCommand {
 
 		UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
 		result.deleteUser();
+
+		for (BiConsumer<String, String> consumer : Memory.getInstance().getOrCreate("users.delete")
+				.getValues(BiConsumer.class)) {
+			consumer.accept(result.getGroup(), result.getUsername());
+		}
 
 		response.setContent("text/plain", "User has been deleted.\n");
 	}

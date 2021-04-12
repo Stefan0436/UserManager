@@ -48,7 +48,7 @@ public class AdminCommands implements IUserManagerCommand, IContextRootProviderE
 		}
 
 		if (!Memory.getInstance().get("usermanager.auth.frontend").getValue(IAuthFrontend.class)
-				.authenticate(UserManagerModule.getAdminGroup(), request, response).success()) {
+				.check(UserManagerModule.getAdminGroup(), request, response)) {
 			response.status = 302;
 			response.message = "Authentication required";
 			response.setHeader("Location", url + "?group=" + UserManagerModule.getAdminGroup() + "&target="

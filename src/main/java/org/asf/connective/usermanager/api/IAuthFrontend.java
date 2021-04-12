@@ -16,6 +16,17 @@ import org.asf.rats.HttpResponse;
 public interface IAuthFrontend {
 
 	/**
+	 * Checks if the authentication header (or cookie or such) is present and valid.
+	 * 
+	 * @param group    User group
+	 * @param request  HTTP request
+	 * @param response HTTP response
+	 * @return True if valid, false otherwise
+	 * @throws IOException If authenticating fails.
+	 */
+	public boolean check(String group, HttpRequest request, HttpResponse response) throws IOException;
+
+	/**
 	 * Authenticates the HTTP request, the default uses authentication headers, but
 	 * you can use login pages too.
 	 * 

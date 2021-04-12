@@ -207,4 +207,23 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				+ "-" + UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
 	}
 
+	@Override
+	public boolean check(String group, HttpRequest request, HttpResponse response) throws IOException {
+		if (request.headers.containsKey("Authorization") || request.headers.containsKey("X-Use-HTTP-Authentication")) {
+			return new DefaultAuthFrontend().check(group, request, response);
+		}
+
+		String[] cookieString = request.headers.getOrDefault("Cookie", "").split("; ");
+		HashMap<String, String> cookies = null;
+
+		String cookieQuery = "";
+		for (String cookie : cookieString) {
+			if (!cookieQuery.isEmpty())
+				cookieQuery += "&";
+			cookieQuery += cookie;
+		}
+		cookies = ParsingUtil.parseQuery(cookieQuery);
+
+		return cookies.containsKey("session") && authenticatedUsers.containsKey(group + "." + cookies.get("session"));
+	}
 }
