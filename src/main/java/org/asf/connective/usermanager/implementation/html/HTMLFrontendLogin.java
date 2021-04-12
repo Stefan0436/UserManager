@@ -115,6 +115,8 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					return res;
 				} else {
 					message = "Invalid credentials";
+					response.status = 401;
+					response.message = "Authorization required";
 				}
 			}
 		}
@@ -138,6 +140,9 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		cookies = ParsingUtil.parseQuery(cookieQuery);
 
 		if (!cookies.containsKey("session") || !authenticatedUsers.containsKey(group + "." + cookies.get("session"))) {
+			response.status = 401;
+			response.message = "Authorization required";
+
 			response.setContent("text/html", "<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n"
 					+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\r\n" + "<style>\r\n"
 					+ "body {font-family: Arial, Helvetica, sans-serif;}\r\n" + "\r\n"
@@ -197,6 +202,8 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 
 			return new AuthResult();
 		} else {
+			response.status = 200;
+			response.message = "OK";
 			response.setContent("text/plain", "OK");
 			return authenticatedUsers.get(group + "." + cookies.get("session")).user;
 		}
