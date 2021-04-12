@@ -2,6 +2,7 @@ package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.AuthResult;
@@ -50,6 +51,11 @@ public class DeleteCommand implements IUserManagerCommand {
 		for (BiConsumer<String, String> consumer : Memory.getInstance().getOrCreate("users.delete")
 				.getValues(BiConsumer.class)) {
 			consumer.accept(result.getGroup(), result.getUsername());
+		}
+
+		for (Consumer<AuthResult> consumer : Memory.getInstance().getOrCreate("users.delete")
+				.getValues(Consumer.class)) {
+			consumer.accept(result);
 		}
 
 		UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
