@@ -47,13 +47,13 @@ public class DeleteCommand implements IUserManagerCommand {
 			return;
 		}
 
-		UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
-		result.deleteUser();
-
 		for (BiConsumer<String, String> consumer : Memory.getInstance().getOrCreate("users.delete")
 				.getValues(BiConsumer.class)) {
 			consumer.accept(result.getGroup(), result.getUsername());
 		}
+
+		UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
+		result.deleteUser();
 
 		response.setContent("text/plain", "User has been deleted.\n");
 	}
