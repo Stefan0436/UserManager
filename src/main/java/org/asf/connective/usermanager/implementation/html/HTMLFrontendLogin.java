@@ -108,7 +108,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					ses.expiry = cal.getTime();
 
 					response.setHeader("Set-Cookie",
-							"session=" + session + "; Expires=" + response.getHttpDate(ses.expiry));
+							"session=" + session + "; Expires=" + response.getHttpDate(ses.expiry) + "; Path=/", true);
 					response.setHeader("Location", file + "?" + request.query);
 
 					authenticatedUsers.put(group + "." + session, ses);
