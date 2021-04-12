@@ -59,6 +59,7 @@ public class DeleteCommand implements IUserManagerCommand {
 		}
 
 		UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
+		UserManagerModule.deleteUser(result.getGroup(), result.getUsername());
 		result.deleteUser();
 
 		response.setContent("text/plain", "User has been deleted.\n");
