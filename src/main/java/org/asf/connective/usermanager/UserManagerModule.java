@@ -635,4 +635,9 @@ public class UserManagerModule extends UserManagerModificationManager {
 		return configuration.get("remove-user");
 	}
 
+	public static void deleteUser(String group, String username) {
+		if (userStorage.containsKey(group + "." + username))
+			userStorage.remove(group + "." + username);
+	}
+
 }
