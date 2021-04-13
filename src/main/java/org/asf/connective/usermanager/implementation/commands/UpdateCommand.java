@@ -66,14 +66,14 @@ public class UpdateCommand implements IUserManagerCommand {
 			}
 
 			UserManagerModule.getAuthBackend().deleteUser(result.getGroup(), result.getUsername());
-			result.setNewUsername(ccfg.username);
-			UserManagerModule.getAuthBackend().updateUser(result.getGroup(), ccfg.username,
-					ccfg.password.toCharArray());
-
 			for (BiConsumer<String[], String> consumer : Memory.getInstance().getOrCreate("users.change.username")
 					.getValues(BiConsumer.class)) {
 				consumer.accept(new String[] { result.getGroup(), result.getUsername() }, ccfg.username);
 			}
+			
+			result.setNewUsername(ccfg.username);
+			UserManagerModule.getAuthBackend().updateUser(result.getGroup(), ccfg.username,
+					ccfg.password.toCharArray());
 		} else {
 			UserManagerModule.getAuthBackend().updateUser(result.getGroup(), result.getUsername(),
 					ccfg.password.toCharArray());
