@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.AuthResult;
@@ -27,6 +28,21 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 	}
 
 	static {
+		Memory.getInstance().getOrCreate("users.delete").<Consumer<AuthResult>>append((user) -> {
+			for (String key : new ArrayList<String>(authenticatedUsers.keySet())) {
+				while (true) {
+					try {
+						Session ses = authenticatedUsers.get(key);
+						if (ses != null && ses.user.getGroup().equals(user.getGroup())
+								&& ses.user.getUsername().equals(user.getUsername())) {
+							authenticatedUsers.remove(key);
+						}
+						break;
+					} catch (Exception e) {
+					}
+				}
+			}
+		});
 		new Thread(() -> {
 			while (true) {
 				try {
