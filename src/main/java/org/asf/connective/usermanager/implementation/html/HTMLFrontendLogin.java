@@ -220,7 +220,6 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		} else {
 			response.status = 200;
 			response.message = "OK";
-			response.setContent("text/plain", "OK");
 			return authenticatedUsers.get(group + "." + cookies.get("session")).user;
 		}
 	}

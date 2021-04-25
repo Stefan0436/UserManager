@@ -43,6 +43,7 @@ public class AuthenticateCommand implements IUserManagerCommand {
 		AuthResult result = Memory.getInstance().get("usermanager.auth.frontend").getValue(IAuthFrontend.class)
 				.authenticate(group, request, response);
 		if (result.success()) {
+			response.setContent("text/html", "OK");
 			if (target != null) {
 				response.status = 302;
 				response.message = "File found";
