@@ -20,11 +20,6 @@ public class ListActivationKeys extends AbstractAdminCommand {
 	@Override
 	public void run() {
 		String group = getValue("group");
-		if (!UserManagerModule.isProductGroup(group)) {
-			setOutput("Not a product group");
-			setResult(false);
-			return;
-		}
 		if (!UserManagerModule.getAuthBackend().validateGroupname(group)) {
 			setOutput("Malformed group name");
 			setResult(false);
