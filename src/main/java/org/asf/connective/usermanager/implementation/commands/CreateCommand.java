@@ -47,7 +47,7 @@ public class CreateCommand implements IUserManagerCommand {
 			return;
 		}
 		if (!ccfg.ownerEmail
-				.matches("^[A-Za-z0-9\\-_.]+\\@[A-Za-z0-9_]+(\\.[A-Za-z0-9]+)?(\\.[A-Za-z0-9]+)?(\\.[A-Za-z0-9]+)?$")) {
+				.matches("^[A-Za-z0-9\\-_.]+\\@[A-Za-z0-9_\\-]+(\\.[A-Za-z0-9]+)?(\\.[A-Za-z0-9]+)?(\\.[A-Za-z0-9]+)?$")) {
 			response.status = 400;
 			response.message = "Bad request";
 			response.setContent("text/plain", "Malformed email address.\n");
