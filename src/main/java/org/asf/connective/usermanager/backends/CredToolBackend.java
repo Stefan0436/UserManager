@@ -1,6 +1,8 @@
 package org.asf.connective.usermanager.backends;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -185,6 +187,13 @@ public class CredToolBackend implements IAuthenticationBackend {
 		if (result.exitCode != 0) {
 			throw new IOException("CredTool Error:\n" + result.error);
 		}
+	}
+
+	@Override
+	public void setNewUserName(String group, String oldName, String newName) throws IOException {
+		File userFile = new File("credentials", "gr." + group + "." + oldName + ".cred");
+		File newUserFile = new File("credentials", "gr." + group + "." + newName + ".cred");
+		Files.move(userFile.toPath(), newUserFile.toPath());
 	}
 
 }

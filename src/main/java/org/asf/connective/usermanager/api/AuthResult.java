@@ -51,7 +51,16 @@ public class AuthResult {
 		this.status = true;
 
 		oldKey = rainkey(password, false).getBytes();
-		this.secureStorage = UserManagerModule.getSecureStore(group, username, oldKey);
+	}
+
+	/**
+	 * Loads the secure storage data if needed
+	 * 
+	 * @throws IOException If loading fails
+	 */
+	public void openSecureStorage() throws IOException {
+		if (secureStorage == null)
+			secureStorage = UserManagerModule.getSecureStore(group, username, oldKey);
 	}
 
 	private String rainkey(char[] password, boolean update) throws IOException {
@@ -169,6 +178,11 @@ public class AuthResult {
 	 * @return User secure storage
 	 */
 	public AuthSecureStorage getUserStorage() {
+		try {
+			openSecureStorage();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not load the secure storage container!");
+		}
 		return secureStorage;
 	}
 
@@ -179,6 +193,11 @@ public class AuthResult {
 	 * @throws IOException If updating fails
 	 */
 	public void setNewPassword(char[] password) throws IOException {
+		try {
+			openSecureStorage();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not load the secure storage container!");
+		}
 		String newKey = rainkey(password, true);
 		secureStorage.changeKey(oldKey, newKey.getBytes());
 		oldKey = newKey.getBytes();
@@ -191,11 +210,16 @@ public class AuthResult {
 	 * @throws IOException
 	 */
 	public void setNewUsername(String newUserName) throws IOException {
+		try {
+			openSecureStorage();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not load the secure storage container!");
+		}
 		File userDataFile = new File(UserManagerModule.getActivatedUsersDir(), group + "." + username + ".lck");
 		File newUserDataFile = new File(UserManagerModule.getActivatedUsersDir(), group + "." + newUserName + ".lck");
 
 		if (newUserDataFile.exists())
-			newUserDataFile.delete();
+			throw new IOException("Username already taken.");
 		if (userDataFile.exists())
 			Files.move(userDataFile.toPath(), newUserDataFile.toPath());
 
@@ -214,7 +238,7 @@ public class AuthResult {
 
 		if (UserManagerModule.getStoreFile(group, username).exists())
 			UserManagerModule.getStoreFile(group, username).delete();
-		
+
 		secureStorage = null;
 	}
 }

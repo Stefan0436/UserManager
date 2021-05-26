@@ -615,12 +615,14 @@ public class UserManagerModule extends UserManagerModificationManager {
 		return configuration.get("update-user");
 	}
 
-	public static void updateUserName(String group, String username, String newUserName) {
+	public static void updateUserName(String group, String username, String newUserName) throws IOException {
 		AuthSecureStorage storage = userStorage.get(group + "." + username);
 		if (storage != null) {
 			userStorage.put(group + "." + newUserName, storage);
 		}
 		userStorage.remove(group + "." + username);
+		
+		UserManagerModule.getAuthBackend().setNewUserName(group, username, newUserName);
 	}
 
 	public static String getAdminCommand() {

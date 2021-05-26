@@ -16,7 +16,7 @@ echo Building...
 goto execute
 
 :execute
-cmd /c gradlew.bat installation
+java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain installation
 
 if NOT EXIST %dir%\server mkdir %dir%\server
 

@@ -17,7 +17,7 @@ plugins {
 
 
 // Basic information
-version = "1.0.0.A8"
+version = "1.0.0.A9"
 group = "org.asf.connective.usermanager"
 
 ext.moduleClass = "UserManagerModule"
@@ -122,7 +122,7 @@ dependencies {
 
 	implementation group: 'org.asf.cyan', name: 'CyanComponents', version: '1.0.0.A4'
 	implementation group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A11'
-	implementation group: 'org.asf.cyan', name: 'CyanUtil', version: '1.0.0.A5'
+	implementation group: 'org.asf.cyan', name: 'CyanUtil', version: '1.0.0.A15'
 
 	implementation group: 'org.asf.aos.util.service', name: 'aosutil-service-SLIB-UTIL', version: '0.0.0.12'
 }

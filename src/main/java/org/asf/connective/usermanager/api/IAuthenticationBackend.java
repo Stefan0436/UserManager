@@ -95,4 +95,14 @@ public interface IAuthenticationBackend {
 	 * @return Array of users in the group
 	 */
 	public String[] getUsers(String group) throws IOException;
+
+	/**
+	 * Changes the username of a user
+	 * 
+	 * @param group   Group name
+	 * @param oldName Old username
+	 * @param newName New username
+	 * @throws IOException
+	 */
+	public void setNewUserName(String group, String oldName, String newName) throws IOException;
 }
