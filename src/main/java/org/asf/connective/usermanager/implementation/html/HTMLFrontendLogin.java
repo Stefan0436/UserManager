@@ -107,6 +107,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					message = "Loading user container... Please wait...";
 
 					String js = "<script>\n";
+					js += "document.getElementsByClassName('container')[0].style.display = 'none';\t";
 					js += "$(window).bind(\"load\", function() { \r\n";
 					js += "\twindow.location = window.location + \"&login=final\";\n";
 					js += "});\n";
@@ -132,6 +133,14 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 						request.query = request.query.replace("&login=check", "");
 					}
 
+					if (request.query.contains("?login=final&")) {
+						request.query = request.query.replace("?login=final&", "?");
+					} else if (request.query.contains("?login=final")) {
+						request.query = request.query.replace("?login=final", "");
+					} else if (request.query.contains("&login=final")) {
+						request.query = request.query.replace("&login=final", "");
+					}
+					
 					response.status = 302;
 					response.message = "File found";
 
@@ -146,9 +155,10 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 							+ response.getHttpDate(ses.expiry) + "; Path=/", true);
 					response.setHeader("Location", file + "?" + request.query);
 
-					response.status = 401;
-					response.message = "Authorization required";
 					authenticatedUsers.put(group + "." + session, ses);
+
+					response.status = 200;
+					response.message = "OK";
 					return new AuthResult();
 				} else {
 					message = "Invalid credentials";
@@ -157,12 +167,12 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				}
 			}
 		}
-		if (!request.query.isEmpty() && request.query.contains("?login=final&")) {
-			request.query = request.query.replace("?login=final&", "?");
-		} else if (!request.query.isEmpty() && request.query.contains("?login=final")) {
-			request.query = request.query.replace("?login=final", "");
-		} else if (!request.query.isEmpty() && request.query.contains("&login=final")) {
-			request.query = request.query.replace("&login=final", "");
+		if (request.query.contains("?login=check&login=final&")) {
+			request.query = request.query.replace("?login=check&login=final&", "?");
+		} else if (request.query.contains("?login=check&login=final")) {
+			request.query = request.query.replace("?login=check&login=final", "");
+		} else if (request.query.contains("&login=check&login=final")) {
+			request.query = request.query.replace("&login=check&login=final", "");
 		}
 
 		String[] cookieString = request.headers.getOrDefault("Cookie", "").split("; ");
