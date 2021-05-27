@@ -106,7 +106,10 @@ public class AuthResult {
 		}
 
 		BigInteger size = BigInteger.valueOf(dateOfUpdate).multiply(BigInteger.valueOf(nano));
-		long totalLength = password.length * (dateOfUpdate / (nano / 4));
+		long time = nano / 4;
+		if (time == 0)
+			time = 1;
+		long totalLength = password.length * (dateOfUpdate / time);
 		while (totalLength > Integer.MAX_VALUE) {
 			totalLength = totalLength / 10;
 		}
