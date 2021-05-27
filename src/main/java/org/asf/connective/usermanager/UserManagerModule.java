@@ -1,17 +1,24 @@
 package org.asf.connective.usermanager;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
@@ -25,6 +32,8 @@ import org.asf.connective.usermanager.implementation.DefaultAdminPanel;
 import org.asf.connective.usermanager.implementation.DefaultAuthFrontend;
 import org.asf.connective.usermanager.implementation.DefaultAuthSecureStorage;
 import org.asf.connective.usermanager.implementation.html.HTMLFrontendLogin;
+import org.asf.connective.usermanager.security.DecryptingInputStream;
+import org.asf.connective.usermanager.security.EncryptingOutputStream;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.rats.Memory;
 import org.asf.rats.ModuleBasedConfiguration;
@@ -585,7 +594,8 @@ public class UserManagerModule extends UserManagerModificationManager {
 		return userDataDir;
 	}
 
-	public static AuthSecureStorage getSecureStore(String group, String username, byte[] key) throws IOException {
+	public static AuthSecureStorage getSecureStore(String group, String username, byte[] key, byte[] legacyKey)
+			throws IOException {
 		if (userStorage.containsKey(group + "." + username)) {
 			if (!userStorage.get(group + "." + username).checkSecurity(key))
 				throw new IOException("Incorrect key for loaded user");
@@ -593,14 +603,122 @@ public class UserManagerModule extends UserManagerModificationManager {
 			return userStorage.get(group + "." + username);
 		}
 
-		AuthSecureStorage storage = AuthSecureStorage.open(getStoreFile(group, username), key);
+		File data = getStoreFile(group, username);
+		if (!data.exists() && getLegacyStoreFile(group, username).exists()) {
+			upgradeOldStore(getLegacyStoreFile(group, username), data, key, legacyKey);
+		}
+
+		AuthSecureStorage storage = AuthSecureStorage.open(data, key);
 		userStorage.put(group + "." + username, storage);
 
 		return storage;
 	}
 
+	private static void upgradeOldStore(File legacyStoreFile, File data, byte[] key, byte[] legacyKey)
+			throws IOException {
+		FileInputStream legacyInputFile = new FileInputStream(legacyStoreFile);
+		FileOutputStream newOutputFile = new FileOutputStream(data);
+		DecryptingInputStream legacy = new DecryptingInputStream(legacyKey, legacyInputFile);
+		EncryptingOutputStream output = new EncryptingOutputStream(key, newOutputFile);
+		legacy.transferTo(output);
+		legacy.close();
+		output.close();
+		legacyInputFile.close();
+		newOutputFile.close();
+	}
+
 	public static File getStoreFile(String group, String username) {
+		return new File(UserManagerModule.getAuthSecureStorageDir(), group + "." + username + ".rsdc");
+	}
+
+	private static File getLegacyStoreFile(String group, String username) {
 		return new File(UserManagerModule.getAuthSecureStorageDir(), group + "." + username + ".sdc");
+	}
+
+	/**
+	 * DO NOT USE! INSECURE, FOR UPGRADING USERS ONLY!
+	 */
+	public static String legacyRainKey(String group, String username, char[] password, boolean update)
+			throws IOException {
+		long dateOfUpdate = 0;
+		long nano = 0;
+
+		File userDataFile = new File(UserManagerModule.getActivatedUsersDir(), group + "." + username + ".lck");
+		if (!userDataFile.exists() || update) {
+			if (update)
+				userDataFile.delete();
+
+			ZonedDateTime tm = ZonedDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC"));
+			dateOfUpdate = tm.toEpochSecond();
+			nano = tm.getNano();
+
+			userDataFile.getParentFile().mkdirs();
+			Files.writeString(userDataFile.toPath(), dateOfUpdate + "/" + nano);
+		} else {
+			String data = Files.readAllLines(userDataFile.toPath()).get(0);
+			dateOfUpdate = Long.valueOf(data.substring(0, data.lastIndexOf("/")));
+			nano = Long.valueOf(data.substring(data.lastIndexOf("/") + 1));
+		}
+
+		BigInteger size = BigInteger.valueOf(dateOfUpdate).multiply(BigInteger.valueOf(nano));
+		long totalLength = password.length * (dateOfUpdate / (nano / 4));
+		while (totalLength > Integer.MAX_VALUE) {
+			totalLength = totalLength / 10;
+		}
+		byte[] containerPassSeed = new byte[(int) totalLength];
+		byte[] sizeArray = size.toByteArray();
+
+		int ind = 0;
+		int i2 = 0;
+		int i3 = 0;
+		int segmentSize = (int) (totalLength / password.length);
+
+		for (int i = 0; i < totalLength; i++) {
+			if (ind == segmentSize) {
+				containerPassSeed[i] = ByteBuffer.allocate(2).putChar(password[i2++]).array()[0];
+				if (i2 == password.length)
+					i2 = 0;
+
+				ind = 0;
+			} else {
+				containerPassSeed[i] = sizeArray[i3++];
+				if (i3 == sizeArray.length)
+					i3 = 0;
+			}
+			ind++;
+		}
+
+		String seedChars = new String(Base64.getEncoder().encode(containerPassSeed));
+		long seed = 1;
+		long seedMin = 0;
+		for (char s : seedChars.toCharArray()) {
+			try {
+				seed = Long.valueOf(seed + "" + (int) s);
+			} catch (NumberFormatException e) {
+				if (seedMin + seed < 0) {
+					break;
+				}
+				seedMin += seed;
+				seed = 1;
+			}
+		}
+
+		Random rnd1 = new Random(seedMin);
+		Random rnd2 = new Random(seed);
+
+		String passkey = "";
+		for (int i = 0; i < totalLength; i += 2) {
+			int num = rnd1.nextInt('9');
+			while (num <= '0')
+				num = rnd1.nextInt('9');
+			passkey += (char) num;
+
+			num = rnd2.nextInt('Z');
+			while (num < 'A')
+				num = rnd2.nextInt('Z');
+			passkey += (char) num;
+		}
+		return passkey;
 	}
 
 	public static String getActivateCommand() {
@@ -621,7 +739,7 @@ public class UserManagerModule extends UserManagerModificationManager {
 			userStorage.put(group + "." + newUserName, storage);
 		}
 		userStorage.remove(group + "." + username);
-		
+
 		UserManagerModule.getAuthBackend().setNewUserName(group, username, newUserName);
 	}
 

@@ -15,7 +15,7 @@ import java.io.OutputStream;
 public class EncryptingOutputStream extends OutputStream {
 
 	/**
-	 * Instanciates the encrypting output stream
+	 * Instantiates the encrypting output stream
 	 * 
 	 * @param key         Key to use for encryption, can be anything, the larger and
 	 *                    more random, the more secure.

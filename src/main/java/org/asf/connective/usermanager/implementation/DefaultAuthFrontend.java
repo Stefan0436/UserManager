@@ -13,7 +13,8 @@ public class DefaultAuthFrontend implements IAuthFrontend {
 	@Override
 	public AuthResult authenticate(String group, HttpRequest request, HttpResponse response) throws IOException {
 		AuthResult res = UserManagerModule.getAuthBackend().authenticate(group, request, response);
-		res.openSecureStorage();
+		if (res.success())
+			res.openSecureStorage();
 		return res;
 	}
 

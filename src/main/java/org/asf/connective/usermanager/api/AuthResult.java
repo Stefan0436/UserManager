@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
@@ -29,6 +32,7 @@ public class AuthResult {
 
 	protected AuthSecureStorage secureStorage = null;
 	private byte[] oldKey = null;
+	private byte[] legacyKey = null;
 
 	/**
 	 * Instanciates a authentication result with failed status
@@ -50,7 +54,8 @@ public class AuthResult {
 		this.group = group;
 		this.status = true;
 
-		oldKey = rainkey(password, false).getBytes();
+		oldKey = rainkey(password, false);
+		legacyKey = UserManagerModule.legacyRainKey(group, username, password, false).getBytes();
 	}
 
 	/**
@@ -60,10 +65,26 @@ public class AuthResult {
 	 */
 	public void openSecureStorage() throws IOException {
 		if (secureStorage == null)
-			secureStorage = UserManagerModule.getSecureStore(group, username, oldKey);
+			secureStorage = UserManagerModule.getSecureStore(group, username, oldKey, legacyKey);
 	}
 
-	private String rainkey(char[] password, boolean update) throws IOException {
+	private byte[] sha512Password(char[] passwd) {
+		byte[] passwordBytes = new byte[passwd.length * 2];
+		int i = 0;
+		for (char ch : passwd) {
+			byte[] bytes = ByteBuffer.allocate(2).putChar(ch).array();
+			passwordBytes[i++] = bytes[0];
+			passwordBytes[i++] = bytes[1];
+		}
+		try {
+			return MessageDigest.getInstance("SHA-512").digest(passwordBytes);
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
+	}
+
+	private byte[] rainkey(char[] passwd, boolean update) throws IOException {
+		byte[] password = sha512Password(passwd);
 		long dateOfUpdate = 0;
 		long nano = 0;
 
@@ -99,7 +120,7 @@ public class AuthResult {
 
 		for (int i = 0; i < totalLength; i++) {
 			if (ind == segmentSize) {
-				containerPassSeed[i] = ByteBuffer.allocate(2).putChar(password[i2++]).array()[0];
+				containerPassSeed[i] = password[i2++];
 				if (i2 == password.length)
 					i2 = 0;
 
@@ -131,18 +152,61 @@ public class AuthResult {
 		Random rnd2 = new Random(seed);
 
 		String passkey = "";
+		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
 		for (int i = 0; i < totalLength; i += 2) {
-			int num = rnd1.nextInt('9');
-			while (num <= '0')
-				num = rnd1.nextInt('9');
-			passkey += (char) num;
+			if (rnd1.nextBoolean()) {
+				int l = rnd1.nextInt(Integer.MAX_VALUE / 10000);
+				while (l < 0)
+					l = rnd1.nextInt();
+				byte[] data = new byte[l];
+				rnd2.nextBytes(data);
+				chunks.add(data);
+			} else {
+				int num = rnd1.nextInt('9');
+				while (num <= '0')
+					num = rnd1.nextInt('9');
+				passkey += (char) num;
 
-			num = rnd2.nextInt('Z');
-			while (num < 'A')
 				num = rnd2.nextInt('Z');
-			passkey += (char) num;
+				while (num < 'A')
+					num = rnd2.nextInt('Z');
+				passkey += (char) num;
+				if (rnd2.nextBoolean()) {
+					chunks.add(passkey.getBytes());
+					passkey = "";
+				}
+			}
 		}
-		return passkey;
+		if (!passkey.isEmpty())
+			chunks.add(passkey.getBytes());
+
+		int l = rnd1.nextInt(Integer.MAX_VALUE / 10000);
+		while (l < 0)
+			if (rnd2.nextBoolean())
+				l = rnd1.nextInt();
+			else
+				l = rnd2.nextInt();
+
+		byte[] data = new byte[l];
+		for (int i = 0; i < l; i++) {
+			int i4 = rnd1.nextInt(chunks.size());
+			while (i4 < 0)
+				if (rnd2.nextBoolean())
+					i4 = rnd1.nextInt(chunks.size());
+				else
+					i4 = rnd2.nextInt(chunks.size());
+
+			byte[] d = chunks.get(i2);
+			int i5 = rnd1.nextInt(d.length);
+			while (i5 < 0)
+				if (rnd2.nextBoolean())
+					i5 = rnd1.nextInt(d.length);
+				else
+					i5 = rnd2.nextInt(d.length);
+			data[i] = d[i5];
+		}
+
+		return data;
 	}
 
 	/**
@@ -198,9 +262,9 @@ public class AuthResult {
 		} catch (IOException e) {
 			throw new RuntimeException("Could not load the secure storage container!");
 		}
-		String newKey = rainkey(password, true);
-		secureStorage.changeKey(oldKey, newKey.getBytes());
-		oldKey = newKey.getBytes();
+		byte[] newKey = rainkey(password, true);
+		secureStorage.changeKey(oldKey, newKey);
+		oldKey = newKey;
 	}
 
 	/**

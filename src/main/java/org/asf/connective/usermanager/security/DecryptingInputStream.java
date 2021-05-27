@@ -14,7 +14,7 @@ import java.io.InputStream;
 public class DecryptingInputStream extends InputStream {
 
 	/**
-	 * Instanciates the decrypting input stream.
+	 * Instantiates the decrypting input stream.
 	 * 
 	 * @param key    Key used for encryption.
 	 * @param source Source stream.
