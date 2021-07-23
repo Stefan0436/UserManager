@@ -140,7 +140,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					} else if (request.query.contains("&login=final")) {
 						request.query = request.query.replace("&login=final", "");
 					}
-					
+
 					response.status = 302;
 					response.message = "File found";
 
@@ -165,7 +165,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				}
 			}
 		}
-		
+
 		if (request.query.contains("?login=check&")) {
 			request.query = request.query.replace("?login=check&", "?");
 		} else if (request.query.contains("?login=check")) {
@@ -181,7 +181,6 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		} else if (request.query.contains("&login=final")) {
 			request.query = request.query.replace("&login=final", "");
 		}
-		
 
 		String[] cookieString = request.headers.getOrDefault("Cookie", "").split("; ");
 		HashMap<String, String> cookies = null;
@@ -203,6 +202,19 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 
 			return new AuthResult();
 		} else {
+			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
+				authenticatedUsers.remove(group + "." + cookies.get(group + ".session"));
+				response.setHeader("Set-Cookie",
+						group + ".session=logout; Expires=" + response.getHttpDate(new Date()) + "; Path=/", true);
+
+				response.status = 401;
+				response.message = "Authorization required (logout)";
+
+				displayMessages(response, request, group, message, buttonBackground, lblColor, file, submitProps, "");
+
+				return new AuthResult();
+			}
+
 			response.status = 200;
 			response.message = "OK";
 			authenticatedUsers.get(group + "." + cookies.get(group + ".session")).user.openSecureStorage();
