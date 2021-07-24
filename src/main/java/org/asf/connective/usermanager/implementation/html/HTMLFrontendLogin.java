@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.html;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -195,6 +196,26 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 
 		if (!cookies.containsKey(group + ".session")
 				|| !authenticatedUsers.containsKey(group + "." + cookies.get(group + ".session"))) {
+			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
+				String q = "";
+				for (String k : query.keySet()) {
+					if (k.equals("servicename") || k.equals("login") || k.equals("logout"))
+						continue;
+					if (q.isEmpty())
+						q += "?";
+					else
+						q += "&";
+					q += URLEncoder.encode(k, "UTF-8");
+					q += "=";
+					q += URLEncoder.encode(query.get(k), "UTF-8");
+				}
+
+				response.status = 302;
+				response.message = "File found";
+				response.headers.put("Location", request.path + q);
+				return new AuthResult();
+			}
+
 			response.status = 401;
 			response.message = "Authorization required";
 
@@ -207,11 +228,22 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				response.setHeader("Set-Cookie",
 						group + ".session=logout; Expires=" + response.getHttpDate(new Date()) + "; Path=/", true);
 
-				response.status = 401;
-				response.message = "Authorization required (logout)";
+				String q = "";
+				for (String k : query.keySet()) {
+					if (k.equals("servicename") || k.equals("login") || k.equals("logout"))
+						continue;
+					if (q.isEmpty())
+						q += "?";
+					else
+						q += "&";
+					q += URLEncoder.encode(k, "UTF-8");
+					q += "=";
+					q += URLEncoder.encode(query.get(k), "UTF-8");
+				}
 
-				displayMessages(response, request, group, message, buttonBackground, lblColor, file, submitProps, "");
-
+				response.status = 302;
+				response.message = "File found";
+				response.headers.put("Location", request.path + q);
 				return new AuthResult();
 			}
 
