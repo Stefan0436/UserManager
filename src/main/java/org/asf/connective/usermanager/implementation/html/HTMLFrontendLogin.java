@@ -67,7 +67,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					}
 				}
 			}
-		}, "Periodic authentication cleanup").start();
+		}, "Periodic Authentication Cleanup").start();
 	}
 
 	@Override
