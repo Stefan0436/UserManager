@@ -101,22 +101,6 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 						.authenticate(group, username, password.toCharArray())) {
 					char[] pass = password.toCharArray();
 					password = null;
-
-					buttonBackground = "#b5bdc9";
-					submitProps += " disabled";
-					lblColor = "#ffa200";
-					message = "Loading user container... Please wait...";
-
-					String js = "<script>\n";
-					js += "document.getElementsByClassName('container')[0].style.display = 'none';\t";
-					js += "$(window).bind(\"load\", function() { \r\n";
-					js += "\tdocument.location.href = document.location.href + \"&login=final\";\n";
-					js += "});\n";
-					js += "</script>";
-
-					displayMessages(response, request, group, message, buttonBackground, lblColor, file, submitProps,
-							js);
-
 					AuthResult res = new AuthResult(group, username, pass);
 					for (int i = 0; i < pass.length; i++)
 						pass[i] = 0;
@@ -126,38 +110,32 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 						session = genSessionKey();
 					}
 
-					if (request.query.contains("?login=check&")) {
-						request.query = request.query.replace("?login=check&", "?");
-					} else if (request.query.contains("?login=check")) {
-						request.query = request.query.replace("?login=check", "");
-					} else if (request.query.contains("&login=check")) {
-						request.query = request.query.replace("&login=check", "");
-					}
-
-					if (request.query.contains("?login=final&")) {
-						request.query = request.query.replace("?login=final&", "?");
-					} else if (request.query.contains("?login=final")) {
-						request.query = request.query.replace("?login=final", "");
-					} else if (request.query.contains("&login=final")) {
-						request.query = request.query.replace("&login=final", "");
-					}
-
-					response.status = 302;
-					response.message = "File found";
-
 					Calendar cal = Calendar.getInstance();
 					cal.add(Calendar.HOUR_OF_DAY, 2);
-
 					Session ses = new Session();
 					ses.user = res;
 					ses.expiry = cal.getTime();
-
-					response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
-							+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=L; HttpOnly", true);
 					authenticatedUsers.put(group + "." + session, ses);
 
-					response.status = 200;
-					response.message = "OK";
+					String q = "";
+					for (String k : query.keySet()) {
+						if (k.equals("login") || k.equals("logout"))
+							continue;
+						if (!q.isEmpty())
+							q += "&";
+						q += URLEncoder.encode(k, "UTF-8");
+						q += "=";
+						q += URLEncoder.encode(query.get(k), "UTF-8");
+					}
+
+					if (!q.isEmpty())
+						q += "&";
+					q += "sessionkey=" + session;
+					q += "&login=session";
+
+					response.status = 302;
+					response.message = "File Found";
+					response.headers.put("Location", request.path + "?" + q);
 					return new AuthResult();
 				} else {
 					message = "Invalid credentials";
@@ -165,23 +143,47 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					response.message = "Authorization required";
 				}
 			}
+		} else if (query.getOrDefault("login", "invalid").equals("session") && query.containsKey("sessionkey")) {
+			String session = query.get("sessionkey");
+			if (authenticatedUsers.containsKey(group + "." + session)) {
+				Session ses = authenticatedUsers.get(group + "." + session);
+				response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
+						+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=Strict; HttpOnly", true);
+
+				buttonBackground = "#b5bdc9";
+				submitProps += " disabled";
+				lblColor = "#ffa200";
+				message = "Loading user container... Please wait...";
+
+				String js = "<script>\n";
+				js += "document.getElementsByClassName('container')[0].style.display = 'none';\t";
+				js += "$(window).bind(\"load\", function() { \r\n";
+				js += "\tdocument.location.href = document.location.href + \"&login=final\";\n";
+				js += "});\n";
+				js += "</script>";
+
+				displayMessages(response, request, group, message, buttonBackground, lblColor, file, submitProps, js);
+				return new AuthResult();
+			} else {
+				message = "Invalid credentials";
+				response.status = 401;
+				response.message = "Authorization required";
+			}
 		}
 
-		if (request.query.contains("?login=check&")) {
-			request.query = request.query.replace("?login=check&", "?");
-		} else if (request.query.contains("?login=check")) {
-			request.query = request.query.replace("?login=check", "");
-		} else if (request.query.contains("&login=check")) {
-			request.query = request.query.replace("&login=check", "");
+		String q = "";
+		for (String k : query.keySet()) {
+			if (k.equals("login") || k.equals("sessionkey"))
+				continue;
+			if (q.isEmpty())
+				q += "?";
+			else
+				q += "&";
+			q += URLEncoder.encode(k, "UTF-8");
+			q += "=";
+			q += URLEncoder.encode(query.get(k), "UTF-8");
 		}
-
-		if (request.query.contains("?login=final&")) {
-			request.query = request.query.replace("?login=final&", "?");
-		} else if (request.query.contains("?login=final")) {
-			request.query = request.query.replace("?login=final", "");
-		} else if (request.query.contains("&login=final")) {
-			request.query = request.query.replace("&login=final", "");
-		}
+		request.query = q;
 
 		String[] cookieString = request.headers.getOrDefault("Cookie", "").split("; ");
 		HashMap<String, String> cookies = null;
@@ -197,9 +199,9 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		if (!cookies.containsKey(group + ".session")
 				|| !authenticatedUsers.containsKey(group + "." + cookies.get(group + ".session"))) {
 			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
-				String q = "";
+				q = "";
 				for (String k : query.keySet()) {
-					if (k.equals("servicename") || k.equals("login") || k.equals("logout"))
+					if (k.equals("login") || k.equals("logout"))
 						continue;
 					if (q.isEmpty())
 						q += "?";
@@ -227,10 +229,9 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				authenticatedUsers.remove(group + "." + cookies.get(group + ".session"));
 				response.setHeader("Set-Cookie", group + ".session=logout; Expires=" + response.getHttpDate(new Date())
 						+ "; Path=/; SameSite=Strict; HttpOnly", true);
-
-				String q = "";
+				q = "";
 				for (String k : query.keySet()) {
-					if (k.equals("servicename") || k.equals("login") || k.equals("logout"))
+					if (k.equals("login") || k.equals("logout"))
 						continue;
 					if (q.isEmpty())
 						q += "?";
@@ -241,6 +242,11 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					q += URLEncoder.encode(query.get(k), "UTF-8");
 				}
 
+				response.status = 302;
+				response.message = "File found";
+				response.headers.put("Location", request.path + q);
+				return new AuthResult();
+			} else if (query.getOrDefault("login", "invalid").equals("final")) {
 				response.status = 302;
 				response.message = "File found";
 				response.headers.put("Location", request.path + q);
