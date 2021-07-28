@@ -175,9 +175,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		for (String k : query.keySet()) {
 			if (k.equals("login") || k.equals("sessionkey"))
 				continue;
-			if (q.isEmpty())
-				q += "?";
-			else
+			if (!q.isEmpty())
 				q += "&";
 			q += URLEncoder.encode(k, "UTF-8");
 			q += "=";
