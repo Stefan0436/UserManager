@@ -153,7 +153,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					ses.expiry = cal.getTime();
 
 					response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
-							+ response.getHttpDate(ses.expiry) + "; Path=/", true);
+							+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=Strict; HttpOnly", true);
 					authenticatedUsers.put(group + "." + session, ses);
 
 					response.status = 200;
@@ -225,8 +225,8 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		} else {
 			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
 				authenticatedUsers.remove(group + "." + cookies.get(group + ".session"));
-				response.setHeader("Set-Cookie",
-						group + ".session=logout; Expires=" + response.getHttpDate(new Date()) + "; Path=/", true);
+				response.setHeader("Set-Cookie", group + ".session=logout; Expires=" + response.getHttpDate(new Date())
+						+ "; Path=/; SameSite=Strict; HttpOnly", true);
 
 				String q = "";
 				for (String k : query.keySet()) {
