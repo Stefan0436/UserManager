@@ -91,6 +91,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		String message = "";
 
 		HashMap<String, String> query = ParsingUtil.parseQuery(request.query);
+		boolean cookieless = query.getOrDefault("nocookies", "false").equals("true");
 		if (query.getOrDefault("login", "invalid").equals("check") && request.method.equals("POST")) {
 			HashMap<String, String> user = ParsingUtil.parseQuery(request.getRequestBody());
 			if (!user.isEmpty()) {
@@ -147,8 +148,10 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 			String session = query.get("sessionkey");
 			if (authenticatedUsers.containsKey(group + "." + session)) {
 				Session ses = authenticatedUsers.get(group + "." + session);
-				response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
-						+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=Strict; HttpOnly", true);
+
+				if (!cookieless)
+					response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
+							+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=Strict; HttpOnly", true);
 
 				buttonBackground = "#b5bdc9";
 				submitProps += " disabled";
@@ -245,6 +248,27 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				response.headers.put("Location", request.path + q);
 				return new AuthResult();
 			} else if (query.getOrDefault("login", "invalid").equals("final")) {
+				if (cookieless && query.containsKey("sessionkey")) {
+					String session = query.get("sessionkey");
+					if (authenticatedUsers.containsKey(group + "." + session)) {
+						response.status = 200;
+						response.message = "OK";
+
+						Session ses = authenticatedUsers.get(group + "." + session);
+						ses.user.openSecureStorage();
+
+						return ses.user;
+					} else {
+						message = "Invalid credentials";
+						response.status = 401;
+						response.message = "Authorization required";
+
+						displayMessages(response, request, group, message, buttonBackground, lblColor, file,
+								submitProps, "");
+						return new AuthResult();
+					}
+				}
+
 				response.status = 302;
 				response.message = "File found";
 				response.headers.put("Location", request.path + (q.isEmpty() ? "" : "?" + q));
