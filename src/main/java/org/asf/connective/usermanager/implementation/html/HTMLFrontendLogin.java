@@ -197,6 +197,26 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 		}
 		cookies = ParsingUtil.parseQuery(cookieQuery);
 
+		if (query.getOrDefault("login", "invalid").equals("final") && cookieless && query.containsKey("sessionkey")) {
+			String session = query.get("sessionkey");
+			if (authenticatedUsers.containsKey(group + "." + session)) {
+				response.status = 200;
+				response.message = "OK";
+
+				Session ses = authenticatedUsers.get(group + "." + session);
+				ses.user.openSecureStorage();
+
+				return ses.user;
+			} else {
+				message = "Invalid credentials";
+				response.status = 401;
+				response.message = "Authorization required";
+
+				displayMessages(response, request, group, message, buttonBackground, lblColor, file, submitProps, "");
+				return new AuthResult();
+			}
+		}
+
 		if (!cookies.containsKey(group + ".session")
 				|| !authenticatedUsers.containsKey(group + "." + cookies.get(group + ".session"))) {
 			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
@@ -248,27 +268,6 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				response.headers.put("Location", request.path + q);
 				return new AuthResult();
 			} else if (query.getOrDefault("login", "invalid").equals("final")) {
-				if (cookieless && query.containsKey("sessionkey")) {
-					String session = query.get("sessionkey");
-					if (authenticatedUsers.containsKey(group + "." + session)) {
-						response.status = 200;
-						response.message = "OK";
-
-						Session ses = authenticatedUsers.get(group + "." + session);
-						ses.user.openSecureStorage();
-
-						return ses.user;
-					} else {
-						message = "Invalid credentials";
-						response.status = 401;
-						response.message = "Authorization required";
-
-						displayMessages(response, request, group, message, buttonBackground, lblColor, file,
-								submitProps, "");
-						return new AuthResult();
-					}
-				}
-
 				response.status = 302;
 				response.message = "File found";
 				response.headers.put("Location", request.path + (q.isEmpty() ? "" : "?" + q));
