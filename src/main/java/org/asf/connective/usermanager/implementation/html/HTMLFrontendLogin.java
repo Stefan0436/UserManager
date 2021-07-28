@@ -247,7 +247,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 			} else if (query.getOrDefault("login", "invalid").equals("final")) {
 				response.status = 302;
 				response.message = "File found";
-				response.headers.put("Location", request.path + q);
+				response.headers.put("Location", request.path + (q.isEmpty() ? "" : "?" + q));
 				return new AuthResult();
 			}
 
