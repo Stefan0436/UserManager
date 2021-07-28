@@ -110,7 +110,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					String js = "<script>\n";
 					js += "document.getElementsByClassName('container')[0].style.display = 'none';\t";
 					js += "$(window).bind(\"load\", function() { \r\n";
-					js += "\t$(location).attr('href', window.location + \"&login=final\");\n";
+					js += "\tdocument.location.href = document.location.href + \"&login=final\";\n";
 					js += "});\n";
 					js += "</script>";
 
@@ -153,7 +153,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 					ses.expiry = cal.getTime();
 
 					response.setHeader("Set-Cookie", group + ".session=" + session + "; Expires="
-							+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=Lax; HttpOnly", true);
+							+ response.getHttpDate(ses.expiry) + "; Path=/; SameSite=L; HttpOnly", true);
 					authenticatedUsers.put(group + "." + session, ses);
 
 					response.status = 200;
@@ -226,7 +226,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 			if (query.getOrDefault("logout", "false").equalsIgnoreCase("true")) {
 				authenticatedUsers.remove(group + "." + cookies.get(group + ".session"));
 				response.setHeader("Set-Cookie", group + ".session=logout; Expires=" + response.getHttpDate(new Date())
-						+ "; Path=/; SameSite=Lax; HttpOnly", true);
+						+ "; Path=/; SameSite=Strict; HttpOnly", true);
 
 				String q = "";
 				for (String k : query.keySet()) {
