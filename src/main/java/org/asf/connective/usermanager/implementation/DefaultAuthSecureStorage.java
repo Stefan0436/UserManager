@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.asf.connective.usermanager.api.AuthSecureStorage;
 import org.asf.connective.usermanager.security.DecryptingInputStream;
@@ -21,6 +22,37 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		public String name;
 		public Object value;
 		public StorageEntry next = null;
+	}
+
+	private class StorageIter implements Iterator<UserEntry> {
+		public StorageEntry next = null;
+
+		@Override
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		@Override
+		public UserEntry next() {
+			StorageEntry ent = next;
+			next = next.next;
+			return new UserEntry(ent.name, ent.value.getClass(), ent.value);
+		}
+
+	}
+
+	@Override
+	public Iterable<UserEntry> getAllEntries() {
+		return new Iterable<UserEntry>() {
+
+			@Override
+			public Iterator<UserEntry> iterator() {
+				StorageIter iter = new StorageIter();
+				iter.next = first;
+				return iter;
+			}
+
+		};
 	}
 
 	private File containerFile;

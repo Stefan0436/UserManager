@@ -15,9 +15,60 @@ public abstract class AuthSecureStorage {
 	}
 
 	/**
+	 * 
+	 * User Entries
+	 * 
+	 * @author Sky Swimmer - AerialWorks Software Foundation
+	 *
+	 */
+	public static class UserEntry {
+		private String name;
+		private Class<?> type;
+		private Object value;
+
+		public UserEntry(String name, Class<?> type, Object value) {
+			this.name = name;
+			this.type = type;
+			this.value = value;
+		}
+
+		/**
+		 * Retrieves the entry's value
+		 * 
+		 * @return Object value
+		 */
+		public Object getValue() {
+			return value;
+		}
+
+		/**
+		 * Retrieves the entry type
+		 * 
+		 * @return Entry class instance
+		 */
+		public Class<?> getType() {
+			return type;
+		}
+
+		/**
+		 * Retrieves the entry name
+		 */
+		public String getName() {
+			return name;
+		}
+	}
+
+	/**
 	 * Main implementation
 	 */
 	protected static AuthSecureStorage implementation = null;
+
+	/**
+	 * Retrieves all entries
+	 * 
+	 * @return Iterable UserEntry instances
+	 */
+	public abstract Iterable<UserEntry> getAllEntries();
 
 	/**
 	 * Opens the secure storage file
@@ -165,6 +216,7 @@ public abstract class AuthSecureStorage {
 
 	/**
 	 * Checks loaded storage security key
+	 * 
 	 * @param key Security key
 	 * @return true if valid, false otherwise
 	 */
