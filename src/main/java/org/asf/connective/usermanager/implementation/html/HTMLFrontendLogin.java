@@ -236,6 +236,11 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				response.status = 302;
 				response.message = "File found";
 				response.headers.put("Location", request.path + q);
+
+				if (query.containsKey("redirect")) {
+					response.headers.put("Location", query.get("redirect"));
+				}
+
 				return new AuthResult();
 			}
 
@@ -266,6 +271,11 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 				response.status = 302;
 				response.message = "File found";
 				response.headers.put("Location", request.path + q);
+
+				if (query.containsKey("redirect")) {
+					response.headers.put("Location", query.get("redirect"));
+				}
+
 				return new AuthResult();
 			} else if (query.getOrDefault("login", "invalid").equals("final")) {
 				response.status = 302;
@@ -349,6 +359,10 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 	public boolean check(String group, HttpRequest request, HttpResponse response) throws IOException {
 		if (request.headers.containsKey("Authorization") || request.headers.containsKey("X-Use-HTTP-Authentication")) {
 			return new DefaultAuthFrontend().check(group, request, response);
+		}
+
+		if (ParsingUtil.parseQuery(request.query).getOrDefault("logout", "false").equalsIgnoreCase("true")) {
+			return false;
 		}
 
 		String[] cookieString = request.headers.getOrDefault("Cookie", "").split("; ");
