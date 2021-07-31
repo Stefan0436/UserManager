@@ -265,6 +265,7 @@ public class AuthResult {
 		} catch (IOException e) {
 			throw new RuntimeException("Could not load the secure storage container!");
 		}
+		UserManagerModule.getAuthBackend().updateUser(group, username, password);
 		byte[] newKey = rainkey(password, true);
 		secureStorage.changeKey(oldKey, newKey);
 		oldKey = newKey;
