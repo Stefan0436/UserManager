@@ -271,6 +271,20 @@ public class AuthResult {
 	}
 
 	/**
+	 * Checks if the given password is correct
+	 * 
+	 * @param passwd Password characters
+	 * @return True if correct, false otherwise
+	 */
+	public boolean checkPassword(char[] passwd) {
+		try {
+			return secureStorage.checkSecurity(rainkey(passwd, false));
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	/**
 	 * Changes the username for this result
 	 * 
 	 * @param newUserName New username
