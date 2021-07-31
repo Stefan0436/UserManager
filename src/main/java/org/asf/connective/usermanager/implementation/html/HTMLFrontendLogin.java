@@ -102,7 +102,8 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 						.authenticate(group, username, password.toCharArray())) {
 					char[] pass = password.toCharArray();
 					password = null;
-					AuthResult res = new AuthResult(group, username, pass);
+					
+					AuthResult res = AuthResult.getResult(group, username, pass);
 					for (int i = 0; i < pass.length; i++)
 						pass[i] = 0;
 

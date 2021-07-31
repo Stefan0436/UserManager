@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 
 import org.asf.connective.usermanager.UserManagerModule;
@@ -24,7 +25,7 @@ import org.asf.connective.usermanager.UserManagerModule;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class AuthResult {
+public class AuthResult implements AutoCloseable {
 	protected boolean status;
 
 	protected String group = null;
@@ -34,6 +35,16 @@ public class AuthResult {
 	private byte[] oldKey = null;
 	private byte[] legacyKey = null;
 
+	private static ArrayList<AuthResult> loadedResults = new ArrayList<AuthResult>();
+
+	@Override
+	public void close() throws Exception {
+		secureStorage = null;
+		oldKey = null;
+		if (loadedResults.contains(this))
+			loadedResults.remove(this);
+	}
+
 	/**
 	 * Instanciates a authentication result with failed status
 	 */
@@ -42,20 +53,49 @@ public class AuthResult {
 	}
 
 	/**
-	 * Intanciates a successful aithentication result and opens the secure storage
+	 * Intanciates a successful authentication result and opens the secure storage
 	 * 
 	 * @param group    User group
 	 * @param username Username
 	 * @param password User password for unlocking the secure storage
 	 * @throws IOException If opening the secure storage fails
 	 */
+	public static AuthResult getResult(String group, String username, char[] password) throws IOException {
+		Optional<AuthResult> optRes = loadedResults.stream()
+				.filter(t -> t.getUsername().equals(username) && t.getGroup().equals(group)).findFirst();
+		if (optRes.isPresent())
+			return optRes.get();
+		else
+			return new AuthResult(group, username, password);
+	}
+
+	/**
+	 * Intanciates a successful authentication result and opens the secure storage
+	 * 
+	 * @param group    User group
+	 * @param username Username
+	 * @param password User password for unlocking the secure storage
+	 * @throws IOException If opening the secure storage fails
+	 * @deprecated Please use getResult for successful results
+	 */
+	@Deprecated
 	public AuthResult(String group, String username, char[] password) throws IOException {
 		this.username = username;
 		this.group = group;
 		this.status = true;
 
-		oldKey = rainkey(password, false);
-		legacyKey = UserManagerModule.legacyRainKey(group, username, password, false).getBytes();
+		Optional<AuthResult> optRes = loadedResults.stream()
+				.filter(t -> t.getUsername().equals(username) && t.getGroup().equals(group)).findFirst();
+		if (!optRes.isPresent()) {
+			oldKey = rainkey(password, false);
+			legacyKey = UserManagerModule.legacyRainKey(group, username, password, false).getBytes();
+			loadedResults.add(this);
+		} else {
+			AuthResult res = optRes.get();
+			oldKey = res.oldKey;
+			legacyKey = res.legacyKey;
+			secureStorage = res.secureStorage;
+		}
 	}
 
 	/**

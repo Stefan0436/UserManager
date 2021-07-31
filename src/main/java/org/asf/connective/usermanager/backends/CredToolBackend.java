@@ -134,7 +134,7 @@ public class CredToolBackend implements IAuthenticationBackend {
 							.getValue(IAuthenticationProvider.class)
 							.authenticate(group, username, password.toCharArray())) {
 
-						AuthResult res = new AuthResult(group, username, password.toCharArray());
+						AuthResult res = AuthResult.getResult(group, username, password.toCharArray());
 						password = null;
 
 						return res;
