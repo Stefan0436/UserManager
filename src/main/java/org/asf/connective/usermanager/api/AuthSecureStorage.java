@@ -141,6 +141,15 @@ public abstract class AuthSecureStorage {
 	public abstract <T> void reassign(String name, Class<?> oldValueType, T newValue);
 
 	/**
+	 * Removes a value
+	 * 
+	 * @param <T>  Value type
+	 * @param name Value name
+	 * @param type Value class
+	 */
+	public abstract <T> void remove(String name, Class<T> type);
+
+	/**
 	 * Checks if a given key and type are present in the user storage
 	 * 
 	 * @param <T>  Value type

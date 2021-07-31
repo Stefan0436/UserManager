@@ -29,11 +29,15 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 
 		@Override
 		public boolean hasNext() {
+			while (next != null && next.value == null)
+				next = next.next;
 			return next != null;
 		}
 
 		@Override
 		public UserEntry next() {
+			while (next.value == null)
+				next = next.next;
 			StorageEntry ent = next;
 			next = next.next;
 			return new UserEntry(ent.name, ent.value.getClass(), ent.value);
@@ -134,7 +138,7 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 	private <T> StorageEntry getInternal(String name, Class<T> type) {
 		StorageEntry ent = first;
 		while (ent != null) {
-			if (ent.name.equals(name) && type.isAssignableFrom(ent.value.getClass())) {
+			if (ent.name.equals(name) && ent.value != null && type.isAssignableFrom(ent.value.getClass())) {
 				return ent;
 			}
 			ent = ent.next;
@@ -148,7 +152,17 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		if (old != null) {
 			old.value = value;
 		} else {
-			StorageEntry ent = new StorageEntry();
+			StorageEntry ent = first;
+			while (ent != null) {
+				if (ent.value == null) {
+					ent.name = name;
+					ent.value = value;
+					return;
+				}
+				ent = ent.next;
+			}
+
+			ent = new StorageEntry();
 			ent.name = name;
 			ent.value = value;
 
@@ -210,6 +224,11 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		PacketBuilder builder = new PacketBuilder();
 		StorageEntry ent = first;
 		while (ent != null) {
+			if (ent.value == null) {
+				ent = ent.next;
+				continue;
+			}
+
 			builder.add(ent.name);
 			if (ent.value instanceof String) {
 				builder.add((String) ent.value);
@@ -272,7 +291,17 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		if (old != null) {
 			old.value = newValue;
 		} else {
-			StorageEntry ent = new StorageEntry();
+			StorageEntry ent = first;
+			while (ent != null) {
+				if (ent.value == null) {
+					ent.name = name;
+					ent.value = newValue;
+					return;
+				}
+				ent = ent.next;
+			}
+
+			ent = new StorageEntry();
 			ent.name = name;
 			ent.value = newValue;
 
@@ -289,6 +318,14 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 			}
 
 			owner.next = ent;
+		}
+	}
+
+	@Override
+	public <T> void remove(String name, Class<T> type) {
+		StorageEntry itm = getInternal(name, type);
+		if (itm != null) {
+			itm.value = null;
 		}
 	}
 
