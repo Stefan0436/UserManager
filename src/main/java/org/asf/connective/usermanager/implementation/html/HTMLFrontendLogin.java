@@ -102,7 +102,7 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 						.authenticate(group, username, password.toCharArray())) {
 					char[] pass = password.toCharArray();
 					password = null;
-					
+
 					AuthResult res = AuthResult.getResult(group, username, pass);
 					for (int i = 0; i < pass.length; i++)
 						pass[i] = 0;
@@ -358,7 +358,8 @@ public class HTMLFrontendLogin implements IAuthFrontend {
 
 	@Override
 	public boolean check(String group, HttpRequest request, HttpResponse response) throws IOException {
-		if (request.headers.containsKey("Authorization") || request.headers.containsKey("X-Use-HTTP-Authentication")) {
+		if ((request.headers.containsKey("Authorization") && request.headers.get("Authorization").startsWith("Basic "))
+				|| request.headers.containsKey("X-Use-HTTP-Authentication")) {
 			return new DefaultAuthFrontend().check(group, request, response);
 		}
 
