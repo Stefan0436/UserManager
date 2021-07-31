@@ -131,6 +131,16 @@ public abstract class AuthSecureStorage {
 	public abstract <T> void set(String name, T value);
 
 	/**
+	 * Re-assigns a value (be careful with this, can cause issues)
+	 * 
+	 * @param <T>          Value type
+	 * @param name         Key name
+	 * @param oldValueType Old value class
+	 * @param newValue     New value object
+	 */
+	public abstract <T> void reassign(String name, Class<?> oldValueType, T newValue);
+
+	/**
 	 * Checks if a given key and type are present in the user storage
 	 * 
 	 * @param <T>  Value type

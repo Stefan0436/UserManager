@@ -266,4 +266,30 @@ public class DefaultAuthSecureStorage extends AuthSecureStorage {
 		return Arrays.equals(key, securityKey);
 	}
 
+	@Override
+	public <T> void reassign(String name, Class<?> oldValueType, T newValue) {
+		StorageEntry old = getInternal(name, oldValueType);
+		if (old != null) {
+			old.value = newValue;
+		} else {
+			StorageEntry ent = new StorageEntry();
+			ent.name = name;
+			ent.value = newValue;
+
+			if (first == null) {
+				first = ent;
+				return;
+			}
+
+			StorageEntry owner = first;
+			while (true) {
+				if (owner.next == null)
+					break;
+				owner = owner.next;
+			}
+
+			owner.next = ent;
+		}
+	}
+
 }
