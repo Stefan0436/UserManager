@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -28,7 +29,8 @@ public class AuthenticateCommand implements IUserManagerCommand {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client)
+			throws IOException {
 		String service = null;
 		String target = null;
 		String group = UserManagerModule.getAllowedGroups()[0];
@@ -41,7 +43,7 @@ public class AuthenticateCommand implements IUserManagerCommand {
 		}
 
 		AuthResult result = Memory.getInstance().get("usermanager.auth.frontend").getValue(IAuthFrontend.class)
-				.authenticate(group, request, response);
+				.authenticate(group, request, response, client);
 		if (result.success()) {
 			response.setContent("text/html", "OK");
 			if (target != null) {

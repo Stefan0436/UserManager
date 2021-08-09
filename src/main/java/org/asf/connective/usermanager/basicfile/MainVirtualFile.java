@@ -83,7 +83,7 @@ public class MainVirtualFile extends CyanComponent implements IVirtualFileProvid
 							((IContextProviderExtension)cmd).provide(context);
 						}
 					}
-					cmd.run(request, response, server);
+					cmd.run(request, response, server, client);
 				} catch (IOException e) {
 					error("Failed to execute usermanager command " + command, e);
 					response.status = 503;

@@ -2,6 +2,7 @@ package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Base64;
 
 import org.asf.connective.usermanager.UserManagerModule;
@@ -25,7 +26,7 @@ public class ActivateCommand implements IUserManagerCommand {
 	}
 
 	@Override
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		UserActivationCCFG ccfg = new UserActivationCCFG(request);
 		if (ccfg.activationKey == null) {
 			response.status = 400;

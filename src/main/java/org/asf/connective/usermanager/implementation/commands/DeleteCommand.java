@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -27,7 +28,7 @@ public class DeleteCommand implements IUserManagerCommand {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		DeleteUserCCFG ccfg = new DeleteUserCCFG(request);
 		if (ccfg.group == null) {
 			response.status = 400;

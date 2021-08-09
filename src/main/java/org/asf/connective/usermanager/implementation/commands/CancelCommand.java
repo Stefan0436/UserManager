@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.IUserManagerCommand;
@@ -23,7 +24,7 @@ public class CancelCommand implements IUserManagerCommand {
 	}
 
 	@Override
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		CancelActivationCCFG ccfg = new CancelActivationCCFG(request);
 		if (ccfg.cancelKey == null) {
 			response.status = 400;

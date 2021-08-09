@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URLEncoder;
 
 import org.asf.connective.usermanager.UserManagerModule;
@@ -36,7 +37,7 @@ public class AdminCommands implements IUserManagerCommand, IContextRootProviderE
 	}
 
 	@Override
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		String url = "/" + contextRoot + "/" + UserManagerModule.getBase() + "/" + UserManagerModule.getAuthCommand();
 		while (url.contains("//")) {
 			url = url.replace("//", "/");

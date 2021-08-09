@@ -2,6 +2,7 @@ package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +26,7 @@ public class CreateCommand implements IUserManagerCommand {
 	}
 
 	@Override
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		UserCreationCCFG ccfg = new UserCreationCCFG(request);
 		if (ccfg.username == null || ccfg.password == null || ccfg.group == null || ccfg.ownerEmail == null) {
 			response.status = 400;

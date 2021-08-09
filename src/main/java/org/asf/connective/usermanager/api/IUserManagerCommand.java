@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.api;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import org.asf.rats.ConnectiveHTTPServer;
 import org.asf.rats.HttpRequest;
@@ -33,7 +34,7 @@ public interface IUserManagerCommand {
 	 * @param server   Server used to process the request
 	 * @throws IOException If processing fails
 	 */
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException;
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException;
 
 	/**
 	 * Optional override, if using the IContextRootProviderExtension interface, this is needed

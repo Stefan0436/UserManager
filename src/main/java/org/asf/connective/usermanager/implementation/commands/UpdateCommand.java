@@ -1,6 +1,7 @@
 package org.asf.connective.usermanager.implementation.commands;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -27,7 +28,7 @@ public class UpdateCommand implements IUserManagerCommand {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server) throws IOException {
+	public void run(HttpRequest request, HttpResponse response, ConnectiveHTTPServer server, Socket client) throws IOException {
 		UpdateUserCCFG ccfg = new UpdateUserCCFG(request);
 		if (ccfg.group == null || ccfg.password == null) {
 			response.status = 400;
