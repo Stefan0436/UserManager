@@ -3,6 +3,8 @@ package org.asf.connective.usermanager.api;
 import java.io.File;
 import java.io.IOException;
 
+import org.asf.cyan.api.common.CyanComponent;
+
 /**
  * 
  * User secure storage - encrypted user storage, implementation-based.
@@ -10,7 +12,7 @@ import java.io.IOException;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public abstract class AuthSecureStorage {
+public abstract class AuthSecureStorage extends CyanComponent {
 	protected AuthSecureStorage() {
 	}
 
