@@ -46,13 +46,15 @@ classes> {
 
     # ...
 
-    org.asf.connective.usermanager.UserManagerModule> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.UserManagerModificationProvider> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.implementation.CreateCommand> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.implementation.AuthenticateCommand> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.implementation.ActivateCommand> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.implementation.CancelCommand> 'UserManager-1.0.0.A1.jar'
-    org.asf.connective.usermanager.implementation.UpdateCommand> 'UserManager-1.0.0.A1.jar'
+    org.asf.connective.usermanager.UserManagerModule> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.UserManagerModificationProvider> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.CreateCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.AuthenticateCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.ActivateCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.CancelCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.UpdateCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.DeleteCommand> 'UserManager-1.0.0.A11.jar'
+    org.asf.connective.usermanager.implementation.commands.AdminCommands> 'UserManager-1.0.0.A11.jar'
 
     # ...
 
