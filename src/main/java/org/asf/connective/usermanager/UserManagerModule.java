@@ -393,7 +393,7 @@ public class UserManagerModule extends UserManagerModificationManager {
 				+ "Dear user, at %date% you have requested a %group% account.\n"
 				+ "Your username is %username%, in this mail, you will find an account activation key.\n\n"
 				+ "You can cancel the request at any time by using the cancel key\n\n" + "Cancel key: %cancelkey%\n"
-				+ "Activation key: %activationkey%\n\n" + "NOTE: they keys are only valid until %expiry-date%.\n");
+				+ "Activation key: %activationkey%\n\n" + "NOTE: these keys are only valid until %expiry-date%.\n");
 	}
 
 	protected static void initComponent() throws IOException {

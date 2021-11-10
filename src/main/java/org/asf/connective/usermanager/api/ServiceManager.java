@@ -31,6 +31,11 @@ public class ServiceManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void addToConfiguration(IAuthService service) {
+		if (((HashMap<String, String>) Memory.getInstance().get("memory.modules.shared.config")
+				.getValue(ModuleBasedConfiguration.class).modules.get("UserManager-AuthServices")) == null) {
+			Memory.getInstance().get("memory.modules.shared.config").getValue(ModuleBasedConfiguration.class).modules
+					.put("UserManager-AuthServices", new HashMap<String, String>());
+		}
 		((HashMap<String, String>) Memory.getInstance().get("memory.modules.shared.config")
 				.getValue(ModuleBasedConfiguration.class).modules.get("UserManager-AuthServices")).put(service.name(),
 						service.path());
